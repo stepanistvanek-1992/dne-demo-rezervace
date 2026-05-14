@@ -191,7 +191,6 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
                       disabled={(date) => 
                         date.getDay() === 0 || date < new Date()
                       }
-                      initialFocus
                       locale={cs}
                       className="bg-white rounded-3xl"
                     />
