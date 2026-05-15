@@ -163,7 +163,7 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className="text-xs font-bold text-gray-500 ml-1">Datum rezervace (Po - So)</FormLabel>
+                <FormLabel className="text-xs font-bold text-gray-500 ml-1">Datum rezervace (Po - Pá)</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -189,7 +189,7 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => 
-                        date.getDay() === 0 || date < new Date()
+                        date.getDay() === 0 || date.getDay() === 6 || date < new Date()
                       }
                       locale={cs}
                       className="bg-white rounded-3xl"
@@ -203,10 +203,13 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
 
           <div className="bg-primary/5 p-4 rounded-2xl space-y-2 border border-primary/10">
             <p className="text-[10px] font-bold text-gray-500 leading-relaxed uppercase">
-              • V případě zakoupení stroje bude půjčovné odečteno z kupní ceny.
+              • DEMO JÍZDA TRVÁ 30 MINUT A JE ZDARMA.
             </p>
             <p className="text-[10px] font-bold text-gray-500 leading-relaxed uppercase">
-              • Individuální požadavky a Neděle po tel. domluvě.
+              • NUTNO SLOŽIT VRATNOU KAUCI UVEDENOU U STROJE.
+            </p>
+            <p className="text-[10px] font-bold text-gray-500 leading-relaxed uppercase">
+              • REZERVACE JSOU MOŽNÉ POUZE V PRACOVNÍ DNY.
             </p>
           </div>
 

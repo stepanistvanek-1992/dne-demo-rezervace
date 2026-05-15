@@ -60,8 +60,8 @@ export function BikeCard({ bike, onReserve }: BikeProps) {
       
       <CardFooter className="p-6 pt-8 flex items-center justify-between border-t border-gray-50/50">
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cena za den</span>
-          <span className="text-2xl font-black text-black tracking-tighter">{bike.rental_fee} Kč</span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Demo jízda</span>
+          <span className="text-xl font-black text-black tracking-tighter uppercase italic leading-none">30 min | Zdarma</span>
         </div>
         <Button 
           onClick={() => onReserve(bike.id)}
