@@ -32,13 +32,19 @@ export default function Home() {
   useEffect(() => {
     let result = bikes;
     if (activeBrand !== "Vše") {
-      result = result.filter((b) => b.brand === activeBrand);
+      result = result.filter(
+        (b) => (b.brand || "").toLowerCase().trim() === activeBrand.toLowerCase().trim()
+      );
     }
     if (activeType !== "Vše") {
-      result = result.filter((b) => b.type === activeType);
+      result = result.filter(
+        (b) => (b.type || "").toLowerCase().trim() === activeType.toLowerCase().trim()
+      );
     }
     if (activeLicense !== "Vše") {
-      result = result.filter((b) => b.license_category === activeLicense);
+      result = result.filter(
+        (b) => (b.license_category || "").toLowerCase().trim() === activeLicense.toLowerCase().trim()
+      );
     }
     setFilteredBikes(result);
   }, [activeBrand, activeType, activeLicense, bikes]);
