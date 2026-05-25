@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { z } from 'zod';
+import { isRateLimited } from '@/lib/rateLimit';
 
 function verifyPassword(req: Request): boolean {
   const incomingPassword = req.headers.get('x-admin-password');
@@ -37,6 +38,11 @@ const saveBikeSchema = z.object({
 });
 
 export async function GET(req: Request) {
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+  if (isRateLimited(`admin_get_${ip}`, 10, 60000)) {
+    return NextResponse.json({ message: 'Příliš mnoho požadavků. Zkuste to prosím znovu za minutu.' }, { status: 429 });
+  }
+
   if (!verifyPassword(req)) {
     return NextResponse.json({ message: 'Neautorizovaný přístup - nesprávné heslo.' }, { status: 401 });
   }
@@ -58,6 +64,11 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+  if (isRateLimited(`admin_post_${ip}`, 10, 60000)) {
+    return NextResponse.json({ message: 'Příliš mnoho požadavků. Zkuste to prosím znovu za minutu.' }, { status: 429 });
+  }
+
   if (!verifyPassword(req)) {
     return NextResponse.json({ message: 'Neautorizovaný přístup - nesprávné heslo.' }, { status: 401 });
   }

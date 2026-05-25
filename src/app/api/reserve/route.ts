@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { z } from 'zod';
+import { isRateLimited } from '@/lib/rateLimit';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -33,6 +34,15 @@ const reservationSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    // Rate Limiting: max 3 reservations per 10 minutes per IP
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    if (isRateLimited(`reserve_${ip}`, 3, 600000)) {
+      return NextResponse.json(
+        { message: 'Příliš mnoho požadavků. Zkuste to prosím znovu za 10 minut.' },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     
     // Validate inputs
