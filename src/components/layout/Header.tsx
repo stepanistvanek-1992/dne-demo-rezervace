@@ -19,7 +19,8 @@ export function Header() {
         </Link>
         
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="/#pujcovna" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Půjčovna</Link>
+          <Link href="/#pujcovna" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Stroje</Link>
+          <Link href="/podminky" className="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors">Podmínky</Link>
           <Link href="/#kontakt">
             <Button className="bg-black text-white hover:bg-primary hover:text-black font-bold px-8 h-12 rounded-2xl transition-all duration-300 shadow-xl shadow-black/10">
               Kontakt
