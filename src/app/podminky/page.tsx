@@ -1,5 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { 
   FileText, 
   ShieldAlert, 
@@ -225,6 +227,14 @@ export default function PodminkyPage() {
               </div>
             </div>
 
+          </div>
+          
+          <div className="flex justify-center mt-16">
+            <Link href="/#pujcovna">
+              <Button className="bg-primary hover:bg-black hover:text-white text-black font-black uppercase tracking-widest text-xs md:text-sm px-10 h-14 rounded-2xl transition-all duration-300 shadow-xl shadow-primary/20 cursor-pointer">
+                Vybrat testovací stroj
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
