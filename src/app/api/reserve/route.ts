@@ -54,6 +54,26 @@ export async function POST(req: Request) {
 
     const { bikeId, fullName, email, phone, date } = validation.data;
 
+    // 0. Check if this bike is already reserved on this day
+    const { data: existingReservation, error: checkError } = await supabase
+      .from('reservations')
+      .select('id')
+      .eq('bike_id', bikeId)
+      .eq('reservation_date', date)
+      .limit(1);
+
+    if (checkError) {
+      console.error('Check reservation error:', checkError);
+      throw checkError;
+    }
+
+    if (existingReservation && existingReservation.length > 0) {
+      return NextResponse.json(
+        { message: 'Tento stroj je již na vybraný den rezervovaný jiným zájemcem.' },
+        { status: 400 }
+      );
+    }
+
     // 1. Save to Supabase
     const { data, error } = await supabase
       .from('reservations')
@@ -85,18 +105,32 @@ export async function POST(req: Request) {
       .eq('id', bikeId)
       .single();
 
+    // 3. Send confirmation email to customer, and CC info@nina-x.cz
     if (process.env.RESEND_API_KEY) {
       await resend.emails.send({
         from: 'rezervace@dnx-rezervace.cz',
-        to: 'info@nina-x.cz',
-        subject: `Nová rezervace: ${bike?.brand} ${bike?.model}`,
+        to: email,
+        cc: 'info@nina-x.cz',
+        subject: `Potvrzení přijetí rezervace: ${bike?.brand} ${bike?.model}`,
         html: `
-          <h1>Nová žádost o rezervaci</h1>
-          <p><strong>Motocykl:</strong> ${bike?.brand} ${bike?.model}</p>
-          <p><strong>Datum:</strong> ${date}</p>
-          <p><strong>Jméno:</strong> ${fullName}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Telefon:</strong> ${phone}</p>
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px; background-color: #fff;">
+            <h2 style="color: #000; font-size: 20px; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid #ffed00; padding-bottom: 10px; margin-bottom: 20px;">
+              Rezervace přijata
+            </h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 20px;">
+              Ahoj, rezervace na tvůj vybraný motocykl byla úspěšně přijata, brzy tě budeme kontaktovat s potvrzením termínu.
+            </p>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffed00;">
+              <p style="margin: 5px 0; font-size: 14px; color: #333;"><strong>Motocykl:</strong> ${bike?.brand} ${bike?.model}</p>
+              <p style="margin: 5px 0; font-size: 14px; color: #333;"><strong>Datum rezervace:</strong> ${date}</p>
+              <p style="margin: 5px 0; font-size: 14px; color: #333;"><strong>Jméno zájemce:</strong> ${fullName}</p>
+              <p style="margin: 5px 0; font-size: 14px; color: #333;"><strong>Telefon:</strong> ${phone}</p>
+            </div>
+            <p style="font-size: 12px; color: #666; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
+              Tým MOTOSHOP DNX Hodonín<br />
+              <a href="mailto:info@motoshopdnx.cz" style="color: #000; font-weight: bold; text-decoration: none;">info@motoshopdnx.cz</a>
+            </p>
+          </div>
         `,
       });
     }
