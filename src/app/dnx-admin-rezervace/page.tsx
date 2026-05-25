@@ -60,15 +60,30 @@ export default function AdminPage() {
     isVisible: true
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "DeusExMachina_1992") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("admin_auth", "true");
-      sessionStorage.setItem("admin_pwd", password);
-      fetchData(password);
-    } else {
-      toast.error("Nesprávné heslo!");
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/admin", {
+        headers: {
+          "x-admin-password": password
+        }
+      });
+      if (response.ok) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem("admin_auth", "true");
+        sessionStorage.setItem("admin_pwd", password);
+        const data = await response.json();
+        setReservations(data.reservations || []);
+        setBikes(data.bikes || []);
+        toast.success("Přihlášení úspěšné.");
+      } else {
+        toast.error("Nesprávné heslo!");
+      }
+    } catch (err: any) {
+      toast.error("Chyba přihlašování: " + err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,18 +101,25 @@ export default function AdminPage() {
     if (!pwd) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_admin_data', { admin_password: pwd });
-      if (error) throw error;
-      if (data) {
-        setReservations(data.reservations || []);
-        setBikes(data.bikes || []);
-      }
-    } catch (error: any) {
-      toast.error("Chyba při načítání: " + error.message);
-      if (error.message.includes('Access Denied')) {
+      const response = await fetch("/api/admin", {
+        headers: {
+          "x-admin-password": pwd
+        }
+      });
+      if (response.status === 401) {
         setIsAuthenticated(false);
         sessionStorage.clear();
+        throw new Error("Neautorizovaný přístup - nesprávné heslo.");
       }
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Nepodařilo se načíst data.");
+      }
+      const data = await response.json();
+      setReservations(data.reservations || []);
+      setBikes(data.bikes || []);
+    } catch (error: any) {
+      toast.error("Chyba při načítání: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -105,8 +127,18 @@ export default function AdminPage() {
 
   async function updateStatus(id: string) {
     try {
-      const { error } = await supabase.rpc('confirm_reservation_secure', { res_id: id, admin_password: password });
-      if (error) throw error;
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password
+        },
+        body: JSON.stringify({ action: 'confirm_reservation', id })
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Chyba při potvrzení rezervace.");
+      }
       toast.success("Rezervace potvrzena.");
       fetchData();
     } catch (error: any) {
@@ -117,8 +149,18 @@ export default function AdminPage() {
   async function deleteReservation(id: string) {
     if (!confirm("Opravdu chcete smazat tuto rezervaci?")) return;
     try {
-      const { error } = await supabase.rpc('delete_reservation_secure', { res_id: id, admin_password: password });
-      if (error) throw error;
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password
+        },
+        body: JSON.stringify({ action: 'delete_reservation', id })
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Chyba při mazání rezervace.");
+      }
       toast.success("Smazáno.");
       fetchData();
     } catch (error: any) {
@@ -173,21 +215,31 @@ export default function AdminPage() {
     const cleanDesc = bikeForm.description.replace(/\s*\[SKRYTO\]/g, "").trim();
     const finalDesc = bikeForm.isVisible ? cleanDesc : `${cleanDesc} [SKRYTO]`;
     try {
-      const { error } = await supabase.rpc('save_bike_secure', {
-        p_id: editingBike?.id || null,
-        p_brand: bikeForm.brand,
-        p_model: bikeForm.model,
-        p_type: bikeForm.type,
-        p_license_category: bikeForm.license_category,
-        p_engine: bikeForm.engine,
-        p_power: bikeForm.power,
-        p_deposit: bikeForm.deposit,
-        p_rental_fee: bikeForm.rental_fee,
-        p_image_url: bikeForm.image_url,
-        p_description: finalDesc,
-        admin_password: password
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password
+        },
+        body: JSON.stringify({
+          action: 'save_bike',
+          p_id: editingBike?.id || null,
+          p_brand: bikeForm.brand,
+          p_model: bikeForm.model,
+          p_type: bikeForm.type,
+          p_license_category: bikeForm.license_category,
+          p_engine: bikeForm.engine,
+          p_power: bikeForm.power,
+          p_deposit: bikeForm.deposit,
+          p_rental_fee: bikeForm.rental_fee,
+          p_image_url: bikeForm.image_url,
+          p_description: finalDesc
+        })
       });
-      if (error) throw error;
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Chyba při ukládání stroje.");
+      }
       toast.success(editingBike ? "Stroj upraven." : "Stroj přidán.");
       setIsBikeDialogOpen(false);
       fetchData();
@@ -205,21 +257,31 @@ export default function AdminPage() {
     const finalDesc = isHidden ? cleanDesc : `${cleanDesc} [SKRYTO]`;
     
     try {
-      const { error } = await supabase.rpc('save_bike_secure', {
-        p_id: bike.id,
-        p_brand: bike.brand,
-        p_model: bike.model,
-        p_type: bike.type,
-        p_license_category: bike.license_category,
-        p_engine: bike.engine,
-        p_power: bike.power,
-        p_deposit: bike.deposit,
-        p_rental_fee: bike.rental_fee,
-        p_image_url: bike.image_url || "",
-        p_description: finalDesc,
-        admin_password: password
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password
+        },
+        body: JSON.stringify({
+          action: 'save_bike',
+          p_id: bike.id,
+          p_brand: bike.brand,
+          p_model: bike.model,
+          p_type: bike.type,
+          p_license_category: bike.license_category,
+          p_engine: bike.engine,
+          p_power: bike.power,
+          p_deposit: bike.deposit,
+          p_rental_fee: bike.rental_fee,
+          p_image_url: bike.image_url || "",
+          p_description: finalDesc
+        })
       });
-      if (error) throw error;
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Chyba při změně viditelnosti.");
+      }
       toast.success(isHidden ? "Stroj je nyní viditelný." : "Stroj byl skryt.");
       fetchData();
     } catch (error: any) {
@@ -232,8 +294,18 @@ export default function AdminPage() {
   const deleteBike = async (id: string) => {
     if (!confirm("Opravdu smazat stroj?")) return;
     try {
-      const { error } = await supabase.rpc('delete_bike_secure', { bike_id: id, admin_password: password });
-      if (error) throw error;
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password
+        },
+        body: JSON.stringify({ action: 'delete_bike', id })
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Chyba při mazání stroje.");
+      }
       toast.success("Stroj smazán.");
       fetchData();
     } catch (error: any) {
