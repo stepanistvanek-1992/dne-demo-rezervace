@@ -42,9 +42,6 @@ export function Footer() {
             <Link href="/podminky" className="text-[10px] text-gray-400 hover:text-primary transition-colors uppercase tracking-widest font-bold">
               Podmínky zapůjčení
             </Link>
-            <Link href="/dnx-admin-rezervace" className="text-[10px] text-gray-400 hover:text-primary transition-colors uppercase tracking-widest font-bold">
-              Admin System
-            </Link>
           </div>
         </div>
       </div>
