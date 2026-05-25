@@ -28,8 +28,8 @@ const reservationSchema = z.object({
     .refine((dateStr) => {
       const date = new Date(dateStr + 'T00:00:00');
       const day = date.getDay();
-      return day !== 0 && day !== 6;
-    }, "Rezervace o víkendech nejsou podporovány.")
+      return day !== 0;
+    }, "Nedělní rezervace nejsou podporovány.")
 });
 
 export async function POST(req: Request) {

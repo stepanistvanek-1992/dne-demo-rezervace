@@ -165,7 +165,7 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className="text-xs font-bold text-gray-500 ml-1">Datum rezervace (Po - Pá)</FormLabel>
+                <FormLabel className="text-xs font-bold text-gray-500 ml-1">Datum rezervace (Po - Pá, So pouze dopoledne)</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -190,14 +190,21 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => 
-                        date.getDay() === 0 || date.getDay() === 6 || date < new Date()
-                      }
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date.getDay() === 0 || date < today;
+                      }}
                       locale={cs}
                       className="bg-white rounded-3xl"
                     />
                   </PopoverContent>
                 </Popover>
+                {field.value && field.value.getDay() === 6 && (
+                  <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mt-1 ml-1 flex items-center gap-1">
+                    <span>⚠️</span> V sobotu testujeme pouze dopoledne (9:00 - 12:00).
+                  </p>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -211,7 +218,7 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
               • NUTNO SLOŽIT VRATNOU KAUCI UVEDENOU U STROJE.
             </p>
             <p className="text-[10px] font-bold text-gray-500 leading-relaxed uppercase">
-              • REZERVACE JSOU MOŽNÉ POUZE V PRACOVNÍ DNY.
+              • REZERVACE JSOU MOŽNÉ V PRACOVNÍ DNY (CELÝ DEN) A V SOBOTU (POUZE DOPOLEDNE).
             </p>
           </div>
 
