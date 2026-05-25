@@ -53,8 +53,8 @@ export default function AdminPage() {
     license_category: "A",
     engine: "",
     power: "",
-    deposit: 10000,
-    rental_fee: 500,
+    deposit: 20000,
+    rental_fee: 0,
     image_url: "",
     description: "",
     isVisible: true
@@ -190,7 +190,7 @@ export default function AdminPage() {
     setEditingBike(null);
     setBikeForm({
       brand: "", model: "", type: "Nakedbike", license_category: "A",
-      engine: "", power: "", deposit: 10000, rental_fee: 500, image_url: "", description: "",
+      engine: "", power: "", deposit: 20000, rental_fee: 0, image_url: "", description: "",
       isVisible: true
     });
     setIsBikeDialogOpen(true);
@@ -408,7 +408,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="space-y-1 mb-6 flex-1 text-xs font-bold text-gray-500 uppercase">
-                      <p>{bike.type}</p><p>{bike.engine} | {bike.power}</p><p className="text-black font-black mt-2">{bike.rental_fee} Kč / den</p>
+                      <p>{bike.type}</p><p>{bike.engine} | {bike.power}</p>
                     </div>
                     <div className="flex gap-2 pt-4 border-t border-gray-50">
                       <Button size="sm" variant="ghost" onClick={() => openEditBike(bike)} className="flex-1 text-gray-600 font-bold text-xs uppercase"><Edit2 className="h-3 w-3 mr-2" /> Upravit</Button>
@@ -436,7 +436,6 @@ export default function AdminPage() {
             <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Motor</label><Input value={bikeForm.engine} onChange={(e) => setBikeForm({...bikeForm, engine: e.target.value})} className="rounded-2xl h-12 font-bold" /></div>
             <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Výkon</label><Input value={bikeForm.power} onChange={(e) => setBikeForm({...bikeForm, power: e.target.value})} className="rounded-2xl h-12 font-bold" /></div>
             <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Kauce</label><Input type="number" value={bikeForm.deposit} onChange={(e) => setBikeForm({...bikeForm, deposit: parseInt(e.target.value)})} className="rounded-2xl h-12 font-bold" /></div>
-            <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Cena</label><Input type="number" value={bikeForm.rental_fee} onChange={(e) => setBikeForm({...bikeForm, rental_fee: parseInt(e.target.value)})} className="rounded-2xl h-12 font-bold" /></div>
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Viditelnost na webu</label>
               <Select value={bikeForm.isVisible ? "true" : "false"} onValueChange={(val) => setBikeForm({...bikeForm, isVisible: val === "true"})}>
