@@ -85,10 +85,9 @@ export async function POST(req: Request) {
       .eq('id', bikeId)
       .single();
 
-    // 3. Send email via Resend
     if (process.env.RESEND_API_KEY) {
       await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'rezervace@dnx-rezervace.cz',
         to: 'info@nina-x.cz',
         subject: `Nová rezervace: ${bike?.brand} ${bike?.model}`,
         html: `
