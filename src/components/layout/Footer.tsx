@@ -11,7 +11,7 @@ export function Footer() {
               <Image src="/logo.webp" alt="Nina-X Logo" fill className="object-contain" />
             </Link>
             <p className="text-gray-400 text-xs leading-relaxed max-w-xs">
-              Autorizovaný prodejce a servis motocyklů v Hodoníně. Vášeň pro dvě kola od roku 1992.
+              Autorizovaný prodejce a servis motocyklů v Hodoníně.
             </p>
           </div>
           <div>
