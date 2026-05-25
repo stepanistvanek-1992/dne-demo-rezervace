@@ -108,11 +108,16 @@ export async function POST(req: Request) {
           return NextResponse.json({ message: val.error.issues[0].message }, { status: 400 });
         }
         
+        let type = val.data.p_type;
+        if (type === 'Supersport') {
+          type = 'SuperSport';
+        }
+        
         result = await supabase.rpc('save_bike_secure', {
           p_id: val.data.p_id,
           p_brand: val.data.p_brand,
           p_model: val.data.p_model,
-          p_type: val.data.p_type,
+          p_type: type,
           p_license_category: val.data.p_license_category,
           p_engine: val.data.p_engine,
           p_power: val.data.p_power,
