@@ -150,7 +150,7 @@ export default function PodminkyPage() {
                   <div>
                     <h3 className="font-bold text-black uppercase tracking-tight text-sm">Vratná kauce</h3>
                     <p className="text-gray-500 text-xs mt-1 leading-relaxed">
-                      Vratná kauce se pohybuje v rozmezí <span className="font-bold text-black">10 000 až 50 000 Kč</span> (výjimečně do 60 000 Kč) podle vybraného modelu stroje. 
+                      Vratná kauce se pohybuje v rozmezí <span className="font-bold text-black">20 000 až 50 000 Kč</span> (výjimečně do 60 000 Kč) podle vybraného modelu stroje. 
                       Skládá se na místě v hotovosti nebo kartou při převzetí. Konkrétní kauce je uvedena přímo u každého motocyklu.
                     </p>
                   </div>
