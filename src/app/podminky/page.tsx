@@ -137,8 +137,7 @@ export default function PodminkyPage() {
                   <div>
                     <h3 className="font-bold text-black uppercase tracking-tight text-sm">Delší zapůjčení</h3>
                     <p className="text-gray-500 text-xs mt-1 leading-relaxed">
-                      Individuální doba zapůjčení nad rámec 30 minut je možná po předchozí domluvě a podléhá individuálnímu schválení. 
-                      Orientační denní ceny činí <span className="font-bold text-black">1 000 Kč</span> pro skútry a <span className="font-bold text-black">2 000 Kč</span> pro motocykly.
+                      Individuální doba zapůjčení nad rámec 30 minut je možná po předchozí domluvě a podléhá individuálnímu schválení.
                     </p>
                   </div>
                 </div>
