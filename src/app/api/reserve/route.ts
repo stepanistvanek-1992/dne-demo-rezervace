@@ -1,13 +1,48 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { z } from 'zod';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const reservationSchema = z.object({
+  bikeId: z.string().uuid("Neplatný identifikátor motocyklu."),
+  fullName: z.string().trim()
+    .min(2, "Jméno musí mít alespoň 2 znaky.")
+    .max(100, "Jméno může mít maximálně 100 znaků.")
+    .regex(/^[a-zA-Zá-žÁ-Ž\s.-]+$/, "Jméno obsahuje nepovolené znaky."),
+  email: z.string().trim().email("Neplatná e-mailová adresa."),
+  phone: z.string().trim()
+    .min(9, "Telefonní číslo je příliš krátké.")
+    .max(20, "Telefonní číslo je příliš dlouhé.")
+    .regex(/^(\+?[0-9\s.-]+)$/, "Neplatný formát telefonního čísla."),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Neplatný formát data. Použijte YYYY-MM-DD.")
+    .refine((dateStr) => {
+      const date = new Date(dateStr + 'T00:00:00');
+      if (isNaN(date.getTime())) return false;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      return date >= today;
+    }, "Datum nesmí být v minulosti.")
+    .refine((dateStr) => {
+      const date = new Date(dateStr + 'T00:00:00');
+      const day = date.getDay();
+      return day !== 0 && day !== 6;
+    }, "Rezervace o víkendech nejsou podporovány.")
+});
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { bikeId, fullName, email, phone, date } = body;
+    
+    // Validate inputs
+    const validation = reservationSchema.safeParse(body);
+    if (!validation.success) {
+      const firstError = validation.error.issues[0].message;
+      return NextResponse.json({ message: firstError }, { status: 400 });
+    }
+
+    const { bikeId, fullName, email, phone, date } = validation.data;
 
     // 1. Save to Supabase
     const { data, error } = await supabase
