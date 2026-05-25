@@ -58,8 +58,11 @@ export default function Home() {
       .order("brand", { ascending: true });
 
     if (data) {
-      setBikes(data);
-      setFilteredBikes(data);
+      const visibleBikes = data.filter(
+        (b) => !(b.description || "").includes("[SKRYTO]")
+      );
+      setBikes(visibleBikes);
+      setFilteredBikes(visibleBikes);
     }
     setIsLoading(false);
   }

@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, CheckCircle, Lock, LogOut, RefreshCw, Edit2, Save, Upload, Loader2 } from "lucide-react";
+import { Plus, Trash2, CheckCircle, Lock, LogOut, RefreshCw, Edit2, Save, Upload, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -56,7 +56,8 @@ export default function AdminPage() {
     deposit: 10000,
     rental_fee: 500,
     image_url: "",
-    description: ""
+    description: "",
+    isVisible: true
   });
 
   const handleLogin = (e: React.FormEvent) => {
@@ -147,24 +148,30 @@ export default function AdminPage() {
     setEditingBike(null);
     setBikeForm({
       brand: "", model: "", type: "Nakedbike", license_category: "A",
-      engine: "", power: "", deposit: 10000, rental_fee: 500, image_url: "", description: ""
+      engine: "", power: "", deposit: 10000, rental_fee: 500, image_url: "", description: "",
+      isVisible: true
     });
     setIsBikeDialogOpen(true);
   };
 
   const openEditBike = (bike: any) => {
     setEditingBike(bike);
+    const isHidden = (bike.description || "").includes('[SKRYTO]');
+    const cleanedDesc = (bike.description || "").replace(/\s*\[SKRYTO\]/g, "").trim();
     setBikeForm({
       brand: bike.brand, model: bike.model, type: bike.type,
       license_category: bike.license_category, engine: bike.engine, power: bike.power,
       deposit: bike.deposit, rental_fee: bike.rental_fee, image_url: bike.image_url || "",
-      description: bike.description || ""
+      description: cleanedDesc,
+      isVisible: !isHidden
     });
     setIsBikeDialogOpen(true);
   };
 
   const saveBike = async () => {
     setIsLoading(true);
+    const cleanDesc = bikeForm.description.replace(/\s*\[SKRYTO\]/g, "").trim();
+    const finalDesc = bikeForm.isVisible ? cleanDesc : `${cleanDesc} [SKRYTO]`;
     try {
       const { error } = await supabase.rpc('save_bike_secure', {
         p_id: editingBike?.id || null,
@@ -177,7 +184,7 @@ export default function AdminPage() {
         p_deposit: bikeForm.deposit,
         p_rental_fee: bikeForm.rental_fee,
         p_image_url: bikeForm.image_url,
-        p_description: bikeForm.description,
+        p_description: finalDesc,
         admin_password: password
       });
       if (error) throw error;
@@ -186,6 +193,37 @@ export default function AdminPage() {
       fetchData();
     } catch (error: any) {
       toast.error("Chyba při ukládání: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleVisibility = async (bike: any) => {
+    setIsLoading(true);
+    const isHidden = (bike.description || "").includes('[SKRYTO]');
+    const cleanDesc = (bike.description || "").replace(/\s*\[SKRYTO\]/g, "").trim();
+    const finalDesc = isHidden ? cleanDesc : `${cleanDesc} [SKRYTO]`;
+    
+    try {
+      const { error } = await supabase.rpc('save_bike_secure', {
+        p_id: bike.id,
+        p_brand: bike.brand,
+        p_model: bike.model,
+        p_type: bike.type,
+        p_license_category: bike.license_category,
+        p_engine: bike.engine,
+        p_power: bike.power,
+        p_deposit: bike.deposit,
+        p_rental_fee: bike.rental_fee,
+        p_image_url: bike.image_url || "",
+        p_description: finalDesc,
+        admin_password: password
+      });
+      if (error) throw error;
+      toast.success(isHidden ? "Stroj je nyní viditelný." : "Stroj byl skryt.");
+      fetchData();
+    } catch (error: any) {
+      toast.error("Chyba při změně viditelnosti: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -281,21 +319,35 @@ export default function AdminPage() {
               <Button onClick={openAddBike} className="bg-primary text-black font-bold h-12 rounded-2xl px-8 shadow-lg shadow-primary/20"><Plus className="h-4 w-4 mr-2" /> Přidat nový</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {bikes.map((bike) => (
-                <div key={bike.id} className="bg-white rounded-3xl p-6 flex flex-col border border-gray-100 hover:shadow-xl transition-all">
-                  <div className="flex justify-between items-start mb-4">
-                    <div><p className="text-[10px] text-primary font-black uppercase tracking-widest">{bike.brand}</p><p className="text-xl font-black uppercase tracking-tighter my-1">{bike.model}</p></div>
-                    <Badge variant="outline" className="rounded-full text-[10px] font-bold px-3">{bike.license_category}</Badge>
+              {bikes.map((bike) => {
+                const isHidden = (bike.description || "").includes('[SKRYTO]');
+                return (
+                  <div key={bike.id} className="bg-white rounded-3xl p-6 flex flex-col border border-gray-100 hover:shadow-xl transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-[10px] text-primary font-black uppercase tracking-widest">{bike.brand}</p>
+                        <p className="text-xl font-black uppercase tracking-tighter my-1">{bike.model}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <Badge variant="outline" className="rounded-full text-[10px] font-bold px-3">{bike.license_category}</Badge>
+                        <Badge variant="secondary" className={cn("rounded-full font-black uppercase text-[9px] px-2 py-0.5 border-none", isHidden ? 'bg-red-100 text-red-700 hover:bg-red-100' : 'bg-green-100 text-green-700 hover:bg-green-100')}>
+                          {isHidden ? 'Skrytý' : 'Aktivní'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-1 mb-6 flex-1 text-xs font-bold text-gray-500 uppercase">
+                      <p>{bike.type}</p><p>{bike.engine} | {bike.power}</p><p className="text-black font-black mt-2">{bike.rental_fee} Kč / den</p>
+                    </div>
+                    <div className="flex gap-2 pt-4 border-t border-gray-50">
+                      <Button size="sm" variant="ghost" onClick={() => openEditBike(bike)} className="flex-1 text-gray-600 font-bold text-xs uppercase"><Edit2 className="h-3 w-3 mr-2" /> Upravit</Button>
+                      <Button size="sm" variant="ghost" onClick={() => toggleVisibility(bike)} className="text-gray-600 h-9 w-9 p-0 hover:text-black hover:bg-gray-100 rounded-full" title={isHidden ? "Zobrazit na webu" : "Skrýt z webu"}>
+                        {isHidden ? <Eye className="h-4 w-4 text-green-600" /> : <EyeOff className="h-4 w-4 text-red-500" />}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => deleteBike(bike.id)} className="text-red-500 h-9 w-9 p-0"><Trash2 className="h-4 w-4" /></Button>
+                    </div>
                   </div>
-                  <div className="space-y-1 mb-6 flex-1 text-xs font-bold text-gray-500 uppercase">
-                    <p>{bike.type}</p><p>{bike.engine} | {bike.power}</p><p className="text-black font-black mt-2">{bike.rental_fee} Kč / den</p>
-                  </div>
-                  <div className="flex gap-2 pt-4 border-t border-gray-50">
-                    <Button size="sm" variant="ghost" onClick={() => openEditBike(bike)} className="flex-1 text-gray-600 font-bold text-xs uppercase"><Edit2 className="h-3 w-3 mr-2" /> Upravit</Button>
-                    <Button size="sm" variant="ghost" onClick={() => deleteBike(bike.id)} className="text-red-500 h-9 w-9 p-0"><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </TabsContent>
         </Tabs>
@@ -313,6 +365,18 @@ export default function AdminPage() {
             <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Výkon</label><Input value={bikeForm.power} onChange={(e) => setBikeForm({...bikeForm, power: e.target.value})} className="rounded-2xl h-12 font-bold" /></div>
             <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Kauce</label><Input type="number" value={bikeForm.deposit} onChange={(e) => setBikeForm({...bikeForm, deposit: parseInt(e.target.value)})} className="rounded-2xl h-12 font-bold" /></div>
             <div className="space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Cena</label><Input type="number" value={bikeForm.rental_fee} onChange={(e) => setBikeForm({...bikeForm, rental_fee: parseInt(e.target.value)})} className="rounded-2xl h-12 font-bold" /></div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Viditelnost na webu</label>
+              <Select value={bikeForm.isVisible ? "true" : "false"} onValueChange={(val) => setBikeForm({...bikeForm, isVisible: val === "true"})}>
+                <SelectTrigger className="rounded-2xl h-12 font-bold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-none shadow-2xl">
+                  <SelectItem value="true">Zobrazit na webu</SelectItem>
+                  <SelectItem value="false">Skrýt z webu</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="col-span-2 space-y-1"><label className="text-[10px] font-bold text-gray-400 uppercase ml-1">O stroji</label><Textarea value={bikeForm.description} onChange={(e) => setBikeForm({...bikeForm, description: e.target.value})} className="rounded-2xl min-h-[120px]" /></div>
             <div className="col-span-2 space-y-2">
               <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Fotka</label>

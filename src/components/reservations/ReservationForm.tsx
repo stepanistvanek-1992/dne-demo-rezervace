@@ -76,20 +76,22 @@ export function ReservationForm({ bikeId, bikeName, bikeDescription, onSuccess }
     }
   };
 
+  const cleanDescription = bikeDescription?.replace(/\s*\[SKRYTO\]/g, "");
+
   return (
     <div className="space-y-6">
       <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 shadow-inner">
         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Rezervujete si stroj</p>
         <p className="text-2xl font-black text-black">{bikeName}</p>
         
-        {bikeDescription && (
+        {cleanDescription && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2 mb-2">
               <Info className="w-3 h-3 text-primary" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">O stroji</span>
             </div>
             <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap italic">
-              {bikeDescription}
+              {cleanDescription}
             </p>
           </div>
         )}
