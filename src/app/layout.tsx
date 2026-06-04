@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
   title: "Rezervace DEMO Motocyklů | Hodonín",
-  description: "Zkušební jízdy na motocyklech Zontes, Morbidelli a Malaguti v Hodoníně.",
+  description: "Zkušební jízdy na motocyklech Morbidelli a Malaguti v Hodoníně.",
 };
 
 export default function RootLayout({

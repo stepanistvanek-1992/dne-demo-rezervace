@@ -81,7 +81,7 @@ export default function Home() {
           </div>
           <div className="max-w-md">
             <p className="text-gray-500 font-medium leading-tight text-sm mb-2">
-              Autorizovaný prodejce značek <span className="text-black font-bold">Aprilia</span>, <span className="text-black font-bold">Moto Guzzi</span>, <span className="text-black font-bold">Vespa</span>, <span className="text-black font-bold">Piaggio</span>, <span className="text-black font-bold">QJ Motor</span>, <span className="text-black font-bold">Royal Enfield</span> a <span className="text-black font-bold">Zontes</span> v Hodoníně.
+              Autorizovaný prodejce značek <span className="text-black font-bold">Aprilia</span>, <span className="text-black font-bold">Moto Guzzi</span>, <span className="text-black font-bold">Vespa</span>, <span className="text-black font-bold">Piaggio</span>, <span className="text-black font-bold">QJ Motor</span> a <span className="text-black font-bold">Royal Enfield</span> v Hodoníně.
             </p>
           </div>
         </div>

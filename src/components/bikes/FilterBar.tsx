@@ -19,7 +19,7 @@ export function FilterBar({
   onTypeChange,
   onLicenseChange,
 }: FilterBarProps) {
-  const brands = ["Vše", "Aprilia", "Moto Guzzi", "Vespa", "Piaggio", "QJ Motor", "Royal Enfield", "Zontes"];
+  const brands = ["Vše", "Aprilia", "Moto Guzzi", "Vespa", "Piaggio", "QJ Motor", "Royal Enfield"];
   const types = ["Vše", "Nakedbike", "Scooter", "Adventure", "Supersport", "Heritage"];
   const licenses = ["Vše", "A", "A2", "A1", "B"];
 
