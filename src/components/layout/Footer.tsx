@@ -29,8 +29,8 @@ export function Footer() {
             <h4 className="text-primary font-black uppercase tracking-widest text-[10px] mb-4">Showroom</h4>
             <div className="space-y-2 text-gray-300 font-bold uppercase text-xs tracking-tighter">
               <p className="flex justify-between"><span>Pondělí - Pátek</span> <span className="text-white">9:00 - 17:00</span></p>
-              <p className="flex justify-between"><span>Sobota</span> <span className="text-white">9:00 - 12:00</span></p>
-              <p className="flex justify-between"><span>Neděle</span> <span className="text-white">Zavřeno</span></p>
+              <p className="flex justify-between text-gray-400 text-[11px]"><span>Polední pauza</span> <span className="text-gray-300">11:30 - 12:30</span></p>
+              <p className="flex justify-between"><span>Sobota - Neděle</span> <span className="text-white">Zavřeno</span></p>
             </div>
           </div>
         </div>
